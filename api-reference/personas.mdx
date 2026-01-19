@@ -1,0 +1,207 @@
+---
+title: 'Personas API'
+description: 'Create, read, update, and delete personas'
+---
+
+## Overview
+
+Personas represent AI characters with specific personality traits, backgrounds, and voice characteristics. They are reusable across multiple scenarios.
+
+## Get All Personas
+
+Retrieve all personas for the authenticated user.
+
+<ParamField body="none" path="none" query="none">
+
+</ParamField>
+
+<ResponseField name="status" type="string">
+  Response status
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of persona objects
+</ResponseField>
+
+```bash
+curl -X GET https://api.waterrai.com/personas \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+```200:json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 123,
+      "name": "Sarah Chen",
+      "job_title": "Senior Product Manager",
+      "demeanor": "friendly",
+      "background": "Experienced product manager...",
+      "voice_id": 1,
+      "avatar": "https://example.com/avatar.jpg",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+## Get Persona by ID
+
+Retrieve a specific persona by its ID.
+
+<ParamField body="none" path="id" type="integer" required>
+  The persona ID
+</ParamField>
+
+```bash
+curl -X GET https://api.waterrai.com/personas/123 \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+```200:json
+{
+  "status": "success",
+  "data": {
+    "id": 123,
+    "name": "Sarah Chen",
+    "job_title": "Senior Product Manager",
+    "demeanor": "friendly",
+    "background": "Experienced product manager with 10 years in tech...",
+    "voice_id": 1,
+    "avatar": "https://example.com/avatar.jpg",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+## Create Persona
+
+Create a new persona with specified characteristics.
+
+<ParamField body="name" type="string" required>
+  Name of the persona (max 100 characters)
+</ParamField>
+
+<ParamField body="job_title" type="string" required>
+  Job title of the persona (max 100 characters)
+</ParamField>
+
+<ParamField body="demeanor" type="string">
+  Personality style. Options: friendly, analytical, empathetic, curious, enthusiastic, critical, casual, blunt, assertive, neutral
+</ParamField>
+
+<ParamField body="background" type="string">
+  Detailed background information about the persona
+</ParamField>
+
+<ParamField body="voice_id" type="integer">
+  ID of the voice associated with the persona
+</ParamField>
+
+<ParamField body="avatar" type="string">
+  URL or path to the persona's avatar image (max 255 characters)
+</ParamField>
+
+```bash
+curl -X POST https://api.waterrai.com/personas \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Sarah Chen",
+    "job_title": "Senior Product Manager",
+    "demeanor": "friendly",
+    "background": "Experienced product manager with 10 years in tech, specializing in user experience and product strategy.",
+    "voice_id": 1
+  }'
+```
+
+```201:json
+{
+  "status": "success",
+  "data": {
+    "id": 123,
+    "name": "Sarah Chen",
+    "job_title": "Senior Product Manager",
+    "demeanor": "friendly",
+    "background": "Experienced product manager...",
+    "voice_id": 1,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+## Update Persona
+
+Update an existing persona.
+
+<ParamField body="name" type="string">
+  Name of the persona (max 100 characters)
+</ParamField>
+
+<ParamField body="job_title" type="string">
+  Job title of the persona (max 100 characters)
+</ParamField>
+
+<ParamField body="demeanor" type="string">
+  Personality style
+</ParamField>
+
+<ParamField body="background" type="string">
+  Detailed background information
+</ParamField>
+
+<ParamField body="voice_id" type="integer">
+  ID of the voice associated with the persona
+</ParamField>
+
+<ParamField body="avatar" type="string">
+  URL or path to the persona's avatar image
+</ParamField>
+
+<ParamField path="id" type="integer" required>
+  The persona ID to update
+</ParamField>
+
+```bash
+curl -X PUT https://api.waterrai.com/personas/123 \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Sarah Chen",
+    "job_title": "VP of Product",
+    "demeanor": "analytical"
+  }'
+```
+
+```200:json
+{
+  "status": "success",
+  "data": {
+    "id": 123,
+    "name": "Sarah Chen",
+    "job_title": "VP of Product",
+    "demeanor": "analytical",
+    "updated_at": "2024-01-15T11:00:00Z"
+  }
+}
+```
+
+## Delete Persona
+
+Delete a persona by ID.
+
+<ParamField path="id" type="integer" required>
+  The persona ID to delete
+</ParamField>
+
+```bash
+curl -X DELETE https://api.waterrai.com/personas/123 \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+```204
+```

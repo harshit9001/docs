@@ -1,0 +1,104 @@
+---
+title: 'Meetings API'
+description: 'Create meetings from scenarios and manage meeting sessions'
+---
+
+## Overview
+
+Meetings are active conversation sessions created from scenarios. Creating a meeting returns a meeting room URL and token that can be used to join the conversation.
+
+<Card
+  title="Looking for meeting analysis?"
+  icon="chart-line"
+  href="/api-reference/analysis"
+>
+  Analysis endpoints are documented separately.
+</Card>
+
+## Create Meeting from Scenario
+
+Create a new meeting using a scenario. This returns a meeting room URL and token that can be used to join the conversation.
+
+<ParamField body="person_name" type="string" required>
+  Name of the person joining the meeting
+</ParamField>
+
+<ParamField body="scenario_id" type="integer" required>
+  ID of the scenario to create the meeting from
+</ParamField>
+
+<ParamField body="meeting_type" type="string">
+  Type of meeting. Options: regular, end-user (default: regular)
+</ParamField>
+
+<ParamField body="voice_id" type="integer">
+  Optional voice ID override
+</ParamField>
+
+<ParamField body="end_user_id" type="integer">
+  End user ID (for end-user meetings)
+</ParamField>
+
+```bash
+curl -X POST https://api.waterrai.com/meetings \
+  -H "Authorization: Bearer YOUR_API_SECRET_OR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "person_name": "John Doe",
+    "scenario_id": 456,
+    "meeting_type": "regular"
+  }'
+```
+
+```201:json
+{
+  "success": true,
+  "data": {
+    "id": 789,
+    "daily_meeting_id": "abc123",
+    "daily_meeting_url": "https://waterrai.daily.co/abc123",
+    "room_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "person_name": "John Doe",
+    "scenario_id": 456,
+    "status": "created",
+    "created_at": "2024-01-15T10:40:00Z"
+  }
+}
+```
+
+<Note>
+  Use the `daily_meeting_url` and `room_token` to join the meeting using Daily.co SDK or embed. The meeting will be automatically tracked and analyzed after completion.
+</Note>
+
+## Get Meeting by ID
+
+Retrieve details of a specific meeting.
+
+<ParamField body="none" path="id" type="integer" required>
+  The meeting ID
+</ParamField>
+
+```bash
+curl -X GET https://api.waterrai.com/meetings/789 \
+  -H "Authorization: Bearer YOUR_API_SECRET_OR_JWT_TOKEN"
+```
+
+```200:json
+{
+  "status": "success",
+  "data": {
+    "id": 789,
+    "daily_meeting_id": "abc123",
+    "daily_meeting_url": "https://waterrai.daily.co/abc123",
+    "person_name": "John Doe",
+    "scenario_id": 456,
+    "status": "ended",
+    "created_at": "2024-01-15T10:40:00Z",
+    "updated_at": "2024-01-15T11:10:00Z"
+  }
+}
+```
+
+<Tip>
+  Need analysis results? See the separate [Analysis API](/api-reference/analysis).
+</Tip>

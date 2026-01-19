@@ -1,33 +1,116 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Complete API reference for WaterrAI endpoints'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to the API Reference
 
-## Welcome
+This section provides comprehensive documentation for all WaterrAI API endpoints. The API is organized into core areas:
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+<CardGroup cols={2}>
+  <Card
+    title="Personas"
+    icon="user"
+    href="/api-reference/personas"
+  >
+    Manage AI personas with personality traits and voice characteristics
+  </Card>
+  <Card
+    title="Scenarios"
+    icon="diagram-project"
+    href="/api-reference/scenarios"
+  >
+    Create and manage conversation scenarios with embed support
+  </Card>
+  <Card
+    title="Meetings"
+    icon="video"
+    href="/api-reference/meetings"
+  >
+    Create meetings from scenarios and manage meeting sessions
+  </Card>
+  <Card
+    title="Analysis"
+    icon="chart-line"
+    href="/api-reference/analysis"
+  >
+    Get analysis results for meetings and scenarios
+  </Card>
+  <Card
+    title="Recordings"
+    icon="video"
+    href="/api-reference/recordings"
+  >
+    Access meeting recordings for playback and review
+  </Card>
+  <Card
+    title="API Secrets"
+    icon="key"
+    href="/api-reference/api-secrets"
+  >
+    Create and manage API secrets for secure authentication
+  </Card>
+  <Card
+    title="Transcripts"
+    icon="file-lines"
+    href="/api-reference/transcripts"
+  >
+    Access meeting transcripts (sentence transcripts recommended)
+  </Card>
+</CardGroup>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require authentication. You can use either **JWT tokens** or **API secrets**:
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+**JWT Tokens:**
+```bash
+Authorization: Bearer YOUR_JWT_TOKEN
 ```
+
+**API Secrets (recommended for automation):**
+```bash
+Authorization: Bearer wai_abc123def456...
+```
+
+API secrets never expire and are ideal for server-to-server communication. See the [API Secrets documentation](/api-reference/api-secrets) for details.
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://api.waterrai.com
+```
+
+## Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "status": "success",
+  "data": { ... }
+}
+```
+
+**Error Response:**
+```json
+{
+  "status": "error",
+  "message": "Error description",
+  "details": "Additional error details"
+}
+```
+
+## Rate Limits
+
+API rate limits are applied per API token. Check response headers for current rate limit information:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in current window
+- `X-RateLimit-Reset`: Time when the rate limit resets
+
+<Tip>
+  **Getting Started?** Check out our [quickstart guide](/quickstart) to create your first persona, scenario, and meeting in minutes.
+</Tip>
