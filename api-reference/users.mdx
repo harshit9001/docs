@@ -1,0 +1,118 @@
+---
+title: 'Users API'
+description: 'Get user workspace and membership information'
+---
+
+## Overview
+
+The Users API provides endpoints to retrieve user workspace information. The most important endpoint is **Get Active Workspace**, which returns the user's active membership ID required for creating meetings and other API calls.
+
+<Warning>
+  **Pre-Setup Required:** Before creating meetings or using other organization-scoped APIs, you must first retrieve your active workspace to get your `membership_id`. This ID is required for many API operations.
+</Warning>
+
+## Get Active Workspace
+
+Retrieve the current user's active workspace and membership information. This endpoint returns the membership ID that you'll need for creating meetings and other API calls.
+
+```bash
+curl -X GET https://api.waterrai.com/users/active-workspace \
+  -H "Authorization: Bearer YOUR_API_SECRET_OR_JWT_TOKEN"
+```
+
+```200:json
+{
+  "success": true,
+  "data": {
+    "id": 42,
+    "type": "creator",
+    "org_id": 15,
+    "user_basic_info_id": 123,
+    "role": "admin",
+    "active": true,
+    "created_at": "2024-01-10T08:00:00Z",
+    "updated_at": "2024-01-15T10:30:00Z",
+    "Organization": {
+      "id": 15,
+      "name": "My Company",
+      "created_at": "2024-01-10T08:00:00Z"
+    }
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | integer | **The membership ID** - Use this for creating meetings and other APIs |
+| `type` | string | Membership type: `creator` or `end_user` |
+| `org_id` | integer | Organization ID the user belongs to |
+| `user_basic_info_id` | integer | User's basic info ID |
+| `role` | string | User's role in the organization |
+| `active` | boolean | Whether this membership is currently active |
+| `Organization` | object | Organization details including name |
+
+<Note>
+  **Important:** Save the `id` value from the response - this is your `membership_id` that you'll need for creating meetings and other organization-scoped operations.
+</Note>
+
+### Error Response
+
+If no active workspace is found:
+
+```404:json
+{
+  "success": false,
+  "error": "Active workspace not found."
+}
+```
+
+## Usage Example
+
+Here's a complete flow showing how to get your membership ID before creating a meeting:
+
+```javascript
+const API_BASE = 'https://api.waterrai.com';
+const API_TOKEN = 'YOUR_API_SECRET_OR_JWT_TOKEN';
+
+async function createMeetingWithWorkspace() {
+  // Step 1: Get active workspace to retrieve membership_id
+  const workspaceResponse = await fetch(`${API_BASE}/users/active-workspace`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${API_TOKEN}`
+    }
+  });
+  const workspace = await workspaceResponse.json();
+  const membershipId = workspace.data.id;
+  
+  console.log('Membership ID:', membershipId);
+
+  // Step 2: Now create a meeting using the membership_id
+  const meetingResponse = await fetch(`${API_BASE}/meetings`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      person_name: "John Doe",
+      scenario_id: 456,
+      meeting_type: "regular",
+      membership_id: membershipId  // Use the membership ID from workspace
+    })
+  });
+  
+  const meeting = await meetingResponse.json();
+  console.log('Meeting created:', meeting.data);
+  
+  return meeting.data;
+}
+
+createMeetingWithWorkspace();
+```
+
+<Tip>
+  **Pro Tip:** Cache the membership ID after the first call - it typically doesn't change unless the user switches organizations or workspaces.
+</Tip>

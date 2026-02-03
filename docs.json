@@ -22,6 +22,12 @@
             ]
           },
           {
+            "group": "Pre-Setup",
+            "pages": [
+              "api-reference/users"
+            ]
+          },
+          {
             "group": "Core APIs",
             "pages": [
               "api-reference/personas",
