@@ -230,7 +230,6 @@
             "group": "Users",
             "pages": [
               "api-reference/endpoint/get-users",
-              "api-reference/endpoint/post-users",
               "api-reference/endpoint/delete-users-userid",
               "api-reference/endpoint/get-users-userid",
               "api-reference/endpoint/put-users-userid",

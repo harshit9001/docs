@@ -11,8 +11,6 @@ info:
 servers:
   - url: https://api.waterr.ai/v1
     description: Production
-  - url: http://localhost:3000
-    description: Local development (CoreBackend on your machine)
 components:
   securitySchemes:
     apiKeyAuth:
@@ -663,7 +661,6 @@ paths:
               type: object
               required:
                 - name
-                - user_basic_info_id
               properties:
                 name:
                   type: string
@@ -675,9 +672,6 @@ paths:
                 instructions:
                   type: string
                   description: Instructions for achieving the goal
-                user_basic_info_id:
-                  type: string
-                  description: ID of the user who owns this goal
                 metrics:
                   type: object
                   description: JSON object containing goal metrics
@@ -744,8 +738,6 @@ paths:
                 description:
                   type: string
                 instructions:
-                  type: string
-                user_basic_info_id:
                   type: string
                 metrics:
                   type: object
@@ -826,7 +818,6 @@ paths:
                     type: object
                     required:
                       - name
-                      - user_basic_info_id
                     properties:
                       name:
                         type: string
@@ -834,8 +825,6 @@ paths:
                       description:
                         type: string
                       instructions:
-                        type: string
-                      user_basic_info_id:
                         type: string
                       metrics:
                         type: object
@@ -970,17 +959,28 @@ paths:
               type: object
               required:
                 - person_name
-                - user_id
-                - org_id
               properties:
                 person_name:
                   type: string
-                user_id:
-                  type: string
-                org_id:
-                  type: string
+                  description: Name of the participant joining the session.
                 scenario_id:
                   type: string
+                  description: UUID of the scenario to use.
+                voice_id:
+                  type: string
+                  description: Optional override for the persona's voice.
+                meeting_type:
+                  type: string
+                  enum:
+                    - regular
+                    - instant
+                  description: Defaults to "regular".
+                note_context:
+                  type: string
+                  description: Session-specific context injected into the AI prompt without modifying the scenario.
+                end_user_id:
+                  type: string
+                  description: For end-user sessions; pairs the meeting with an existing end_user membership.
       responses:
         '201':
           description: Meeting created successfully
@@ -1141,6 +1141,11 @@ paths:
               properties:
                 duration_seconds:
                   type: integer
+                  description: Client-reported session duration in seconds. Server reconciles with server-side timing.
+                ended_at:
+                  type: string
+                  format: date-time
+                  description: Timestamp when the client closed the session.
       responses:
         '200':
           description: Meeting ended successfully
@@ -1234,6 +1239,9 @@ paths:
                   items:
                     type: object
                     properties:
+                      id:
+                        type: string
+                        description: When set, updates an existing participant row.
                       email:
                         type: string
                       name:
@@ -1260,6 +1268,12 @@ paths:
                           - daily
                       is_self:
                         type: boolean
+                      joined_at:
+                        type: string
+                        format: date-time
+                      left_at:
+                        type: string
+                        format: date-time
       responses:
         '200':
           description: Participants saved
@@ -1330,7 +1344,6 @@ paths:
               required:
                 - name
                 - job_title
-                - user_basic_info_id
               properties:
                 name:
                   type: string
@@ -1343,9 +1356,6 @@ paths:
                 voice_id:
                   type: string
                   description: ID of the voice associated with the persona
-                user_basic_info_id:
-                  type: string
-                  description: ID of the user who owns this persona
                 demeanor:
                   type: string
                   enum:
@@ -1367,6 +1377,9 @@ paths:
                   type: string
                   maxLength: 255
                   description: URL or path to the persona's avatar image
+                gender:
+                  type: string
+                  description: Persona gender (used for voice/avatar defaults).
       responses:
         '201':
           description: Persona created successfully
@@ -1448,8 +1461,6 @@ paths:
                   maxLength: 100
                 voice_id:
                   type: string
-                user_basic_info_id:
-                  type: string
                 demeanor:
                   type: string
                   enum:
@@ -1468,6 +1479,8 @@ paths:
                 avatar:
                   type: string
                   maxLength: 255
+                gender:
+                  type: string
       responses:
         '200':
           description: Persona updated successfully
@@ -1535,7 +1548,6 @@ paths:
                     required:
                       - name
                       - job_title
-                      - user_basic_info_id
                     properties:
                       name:
                         type: string
@@ -1543,8 +1555,6 @@ paths:
                       job_title:
                         type: string
                         maxLength: 100
-                      user_basic_info_id:
-                        type: string
                       voice_id:
                         type: string
                       demeanor:
@@ -1554,6 +1564,8 @@ paths:
                       avatar:
                         type: string
                         maxLength: 255
+                      gender:
+                        type: string
       responses:
         '201':
           description: Personas created successfully
@@ -1722,7 +1734,6 @@ paths:
                 - title
                 - url
                 - meeting_id
-                - user_id
               properties:
                 title:
                   type: string
@@ -1737,8 +1748,6 @@ paths:
                 size_bytes:
                   type: integer
                 description:
-                  type: string
-                user_id:
                   type: string
       responses:
         '201':
@@ -1952,7 +1961,6 @@ paths:
                 - name
                 - type
                 - persona_id
-                - org_id
               properties:
                 name:
                   type: string
@@ -1966,6 +1974,9 @@ paths:
                 user_prompt:
                   type: string
                   description: Original user prompt entered on Create page
+                welcome_message:
+                  type: string
+                  description: Optional first message shown when a participant enters.
                 type:
                   type: string
                   enum:
@@ -1976,12 +1987,14 @@ paths:
                 persona_id:
                   type: string
                   description: ID of the associated persona
-                org_id:
-                  type: string
-                  description: Organization ID
                 data_model_id:
                   type: string
                   description: ID of the associated data model (optional)
+                goals:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of goal IDs to attach to the scenario.
       responses:
         '201':
           description: Scenario created successfully
@@ -2337,20 +2350,29 @@ paths:
               type: object
               required:
                 - userInput
-                - userId
               properties:
                 userInput:
                   type: string
                   description: Simple text description of what the user wants to practice
                   example: I want to practice negotiating with a difficult client
-                userId:
+                type:
                   type: string
-                  description: ID of the user creating the scenario
-                  example: user123
-                orgId:
+                  enum:
+                    - interview
+                    - roleplay
+                    - upskill
+                    - brainstorm
+                  description: Scenario type the generated scenario should be classified as.
+                duration:
+                  type: integer
+                  description: Suggested session duration in minutes.
+                allow_live_vision:
+                  type: boolean
+                allow_web_search:
+                  type: boolean
+                behavioralContext:
                   type: string
-                  description: Organization ID (optional)
-                  example: org456
+                  description: Extra free-form context to bias the AI generation.
                 file:
                   type: string
                   format: binary
@@ -2388,6 +2410,8 @@ paths:
                 user_prompt:
                   type: string
                   description: Original user prompt entered on Create page
+                welcome_message:
+                  type: string
                 type:
                   type: string
                   enum:
@@ -2397,9 +2421,6 @@ paths:
                     - brainstorm
                 persona_id:
                   type: string
-                org_id:
-                  type: string
-                  maxLength: 100
                 data_model_id:
                   type: string
                   description: ID of the associated data model (optional)
@@ -2407,6 +2428,64 @@ paths:
                   type: array
                   items:
                     type: string
+                visibility:
+                  type: string
+                  enum:
+                    - public
+                    - private
+                webhook_url:
+                  type: string
+                redirect_url:
+                  type: string
+                language:
+                  type: string
+                  description: BCP-47 language tag biasing STT/TTS for the session.
+                maxDuration:
+                  type: integer
+                  description: Maximum session duration in minutes.
+                max_participants:
+                  type: integer
+                allow_screen_share:
+                  type: boolean
+                allow_participant_video:
+                  type: boolean
+                allow_participant_audio:
+                  type: boolean
+                allow_recording:
+                  type: boolean
+                allow_transcription:
+                  type: boolean
+                allow_chat:
+                  type: boolean
+                allow_live_vision:
+                  type: boolean
+                allow_web_search:
+                  type: boolean
+                use_gpt_vision:
+                  type: boolean
+                deep_think:
+                  type: boolean
+                auto_analysis:
+                  type: boolean
+                waiting_room_enabled:
+                  type: boolean
+                auto_admit:
+                  type: boolean
+                end_call_enabled:
+                  type: boolean
+                prejoin_camera_on:
+                  type: boolean
+                eager_bot_join:
+                  type: boolean
+                consent_required:
+                  type: boolean
+                consent_message:
+                  type: string
+                use_own_keys:
+                  type: boolean
+                controls:
+                  type: object
+                  description: Free-form per-scenario control overrides (camera, mic, share, etc.).
       responses:
         '200':
           description: Scenario updated successfully
@@ -2587,7 +2666,6 @@ paths:
                       - name
                       - type
                       - persona_id
-                      - org_id
                     properties:
                       name:
                         type: string
@@ -2612,9 +2690,6 @@ paths:
                       persona_id:
                         type: string
                         description: ID of the associated persona
-                      org_id:
-                        type: string
-                        description: Organization ID
                       goals:
                         type: array
                         items:
@@ -2692,9 +2767,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - type
-                - duration
+              description: At least one field must be present.
               properties:
                 redirect_url:
                   type: string
@@ -2708,6 +2781,14 @@ paths:
                 duration:
                   type: integer
                   description: Duration in minutes
+                consent_required:
+                  type: boolean
+                consent_message:
+                  type: string
+                booking_url:
+                  type: string
+                booking_enabled:
+                  type: boolean
       responses:
         '200':
           description: Session options updated successfully
@@ -3040,42 +3121,6 @@ paths:
           description: Server error
       security:
         - apiKeyAuth: []
-    post:
-      summary: Create a new user
-      tags:
-        - Users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - user_id
-              properties:
-                user_id:
-                  type: string
-                first_name:
-                  type: string
-                last_name:
-                  type: string
-                email:
-                  type: string
-                phone:
-                  type: string
-                city:
-                  type: string
-                country:
-                  type: string
-                summary:
-                  type: string
-      responses:
-        '201':
-          description: User created successfully
-        '500':
-          description: Server error
-      security:
-        - apiKeyAuth: []
   /users/{userId}:
     get:
       summary: Get a user by ID
@@ -3331,15 +3376,12 @@ paths:
                 - partner_voice_id
                 - name
                 - provider
-                - user_basic_info_id
               properties:
                 partner_voice_id:
                   type: string
                 name:
                   type: string
                 provider:
-                  type: string
-                user_basic_info_id:
                   type: string
       responses:
         '201':
